@@ -16,11 +16,12 @@ services:
       # Absent -> Maintainer. One of: Maintainer | Developer | DevOps | FullPermission.
       GitLabMcp__Profile: Developer
 
-      # Absent -> https://gitlab.com/api/v4/. Point this at a self-hosted instance or a different domain
-      # instead — it must end in "api/v4/" exactly (checked at startup, fails fast with a clear message
-      # otherwise). A path-prefixed self-hosted install ("https://example.com/gitlab/api/v4/") and a
-      # non-standard port ("https://gitlab.internal:8443/api/v4/") both work the same way — no special
-      # syntax needed beyond standard URL rules. GitLabGraphQlEndpointTests pins down all of these cases.
+      # Absent -> https://gitlab.com/api/v4/. Just set this to your own instance's URL — a self-hosted
+      # domain ("https://gitlab.example.com"), a path-prefixed install ("https://example.com/gitlab"), or
+      # a non-standard port ("https://gitlab.internal:8443") — "api/v4/" is appended automatically if it
+      # isn't already there (GitLabBaseAddressNormalizerTests / GitLabGraphQlEndpointTests pin this down).
+      # A path that already ends in the wrong API version (e.g. ".../api/v5/") is left alone and fails
+      # fast at startup instead of being silently rewritten.
       GitLab__BaseAddress: "https://gitlab.com/api/v4/"
     secrets:
       - GitLab__AccessToken # mounted at /run/secrets/GitLab__AccessToken (DEC-013 Tier 2), never an env var here

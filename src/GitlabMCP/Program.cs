@@ -49,6 +49,12 @@ builder.Services.PostConfigure<GitLabClientOptions>(o =>
     // the PRIVATE-TOKEN header otherwise. BaseAddress binds as a Uri, which never carries a stray
     // trailing newline from a config value — only the token (a plain string) needs trimming.
     o.AccessToken = o.AccessToken?.Trim() ?? string.Empty;
+
+    // DEC-034: let GitLab:BaseAddress be just the instance's own URL (self-hosted or not) — runs before
+    // ValidateGitLabClientOptions, so the common case (a bare self-hosted domain) always passes startup
+    // instead of failing on a missing "api/v4/" suffix the operator was never told to add.
+    if (o.BaseAddress is { IsAbsoluteUri: true } baseAddress)
+        o.BaseAddress = GitLabBaseAddressNormalizer.Normalize(baseAddress);
 });
 
 // --- GraphQL client (DEC-020/021): typed client, base address derived from the REST options, same

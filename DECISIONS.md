@@ -1023,6 +1023,59 @@ deliberate: an agent mid-task should not have to fill seven fields to record tha
   `docker-aot-image`/`mcp-server-smoke-test` skills were updated to stop describing the pre-fix,
   pre-CI/CD, single-project-era state as current.
 
+### DEC-033 · `.gitignore`'s `**/[Pp]ackages/*` was silently dropping this project's own `Packages/` source
+
+- **Status** DECIDED · **Date** 2026-09-09 · **Owner files** `.gitignore`
+- **Decision.** Deleted the standard `VisualStudio.gitignore` boilerplate block `**/[Pp]ackages/*` (plus
+  its `!**/[Pp]ackages/build/` exception) rather than narrowing it. This repo uses Central Package
+  Management (`Directory.Packages.props`) + `PackageReference` exclusively — there is no
+  `packages.config`-era restore folder for that rule to ever legitimately match.
+- **Context.** The first real push (this session, DEC-032) was followed by CI's very first run failing
+  with `CS0234`/`CS0246`/`SYSLIB1030` on `PackagesJsonContext.cs` — the `GitlabMCP.Contracts.Packages`
+  namespace didn't exist on the runner. Root cause: git's ignore matching is case-insensitive on Windows
+  (`core.ignorecase=true`, the default), so `**/[Pp]ackages/*` matched this project's own
+  `src/GitlabMCP.Contracts/Packages/` and `src/GitlabMCP.Mapping/Packages/` directories — 15 files, the
+  entire GitLab Packages/Container Registry/Debian/Terraform-module domain — and they were **never
+  tracked by git at all**, from the moment those directories were first created. Invisible for the whole
+  session because every local `dotnet build`/`docker build` reads the real filesystem directly, never
+  through git; a fresh clone (exactly what GitHub Actions' first run did) was the first thing to ever
+  actually exercise what git had recorded, and it broke immediately.
+- **Consequences.** Recovered via `git add -f`; verified with a genuinely fresh `git clone` built inside
+  a Linux container (matching CI's environment exactly, not just re-testing the already-populated local
+  working tree) before pushing again. The real, actual first GitHub Actions run after this fix is green:
+  build+test and the Docker/AOT gate both pass. **Lesson for any future large `git add -A`/session-start
+  staging operation in this repo: verify with a fresh clone, not just `git status`, since a case-fold
+  gitignore collision produces zero local symptoms.**
+
+### DEC-034 · `GitLab:BaseAddress` accepts a bare URL — `api/v4/` is appended automatically
+
+- **Status** DECIDED · **Date** 2026-09-10 · **Owner files** `src/GitlabMCP.Abstractions/GitLabBaseAddressNormalizer.cs`,
+  `src/GitlabMCP/Program.cs`
+- **Decision.** A new `GitLabBaseAddressNormalizer.Normalize(Uri)` runs inside the existing
+  `PostConfigure<GitLabClientOptions>` in `Program.cs` — before `ValidateGitLabClientOptions` or
+  `GitLabGraphQlEndpoint.Resolve` ever see the value. Rule: if the URL's path already contains an `api`
+  segment anywhere, leave it untouched (assume the operator meant exactly what they typed — including a
+  deliberately-but-wrongly-versioned `.../api/v5/`, which should fail loudly, not be silently rewritten
+  into a nonsense double path); otherwise append `api/v4/` to whatever prefix was given — nothing for a
+  bare domain, the existing prefix for a path-prefixed self-hosted install — and always normalize to
+  exactly one trailing slash.
+- **Context.** DEC-032/CLAUDE.md had already documented that `GitLab:BaseAddress` supports self-hosted
+  instances, but required the operator to know and type the exact `api/v4/` REST suffix themselves — a
+  real, reported point of friction (the request was, verbatim, "just set up the GitLab URL, since it
+  could be a self-hosted GitLab's URL," which the prior design technically satisfied but did not make
+  simple). Normalizing once, centrally, before both consumers of the value (REST validation and GraphQL
+  endpoint derivation) — rather than teaching either of them to accept a bare URL individually — keeps
+  the "one place, not per-call" pattern this codebase already uses for error mapping and profile gating.
+- **Consequences.** `GitLab__BaseAddress=https://gitlab.mycompany.internal` (no path at all) now boots
+  and reports `gitLabBaseAddress: "https://gitlab.mycompany.internal/api/v4/"` from the `server_info`
+  resource — verified live in a rebuilt Docker container, alongside a path-prefixed bare self-hosted URL
+  (`https://example.com/gitlab` → `.../gitlab/api/v4/`) and confirming a deliberately wrong version path
+  (`https://gitlab.com/api/v5/`) still fails fast with the same clear `OptionsValidationException` as
+  before, unmangled. 15 new unit tests (`GitLabBaseAddressNormalizerTests`) cover the bare-domain,
+  path-prefixed, non-standard-port, already-correct (idempotency), and leave-alone cases — total suite
+  37→52. README.md, `compose.yaml` and the `docker-aot-image` skill's config-key index were updated to
+  describe "just set your instance's URL" rather than "must end in `api/v4/`".
+
 ## Re-verify the stamped facts
 
 Run from the repo root in Git Bash. Each was run on 2026-09-09 and the expected output is beside it.
