@@ -1,0 +1,133 @@
+name: Release
+
+# Tag a commit "vX.Y.Z" to cut a release: re-run the same build+test gate as CI, then build and push
+# the linux/amd64 image to Docker Hub under version:arch-shaped tags, then publish a GitHub Release.
+# Manual re-runs (workflow_dispatch) republish whatever ref they're run against under the SAME tags —
+# useful to recover from a registry hiccup without cutting a new version.
+#
+# Action pins below are the majors verified (2026-09-09) to ship `runs: using: 'node24'` — GitHub retires
+# Node 20 runner support on 2026-09-23, and every one major below that (checkout@v4-6, setup-dotnet@v4-5,
+# cache@v4-5, login-action@v1-3, setup-buildx-action@v1-3, build-push-action@v1-6) is still on node20.
+# Do not downgrade any of these without re-checking that date.
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+
+# Never cancel-in-progress here, unlike ci.yml — docker-release actually pushes (push: true below), so
+# an auto-cancelled in-flight run could leave the mutable "latest"/"latest-amd64" tags on the registry
+# pointed at whichever of two overlapping runs happened to finish last, not the intended one. Serialize
+# instead of cancelling: a second push/dispatch queues behind the first rather than racing it.
+concurrency:
+  group: release-${{ github.workflow }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    name: Build & test (Release)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore GitlabMCP.slnx
+
+      - name: Build (Release)
+        run: dotnet build GitlabMCP.slnx --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test GitlabMCP.slnx --configuration Release --no-build
+
+  docker-release:
+    name: Build & push Docker image
+    needs: build-test
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      image: ${{ steps.meta.outputs.image }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # Tag push -> "v1.2.3" -> version "1.2.3". workflow_dispatch on a non-tag ref has no leading "v"
+      # to strip and gets a short-sha dev tag instead, so a manual run never collides with a real release.
+      # DOCKERHUB_USERNAME is read through env: (not spliced via ${{ }} into the script body) and re-masked
+      # after the lowercase transform, because GitHub's log redaction only matches a secret's original,
+      # untransformed value — a case-folded copy of a secret is otherwise NOT redacted (adversarial review
+      # finding, DEC-032).
+      - name: Compute version and image ref
+        id: meta
+        env:
+          RAW_DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            version="${GITHUB_REF_NAME#v}"
+          else
+            version="0.0.0-dev.$(git rev-parse --short HEAD)"
+          fi
+          user="$(printf '%s' "${RAW_DOCKERHUB_USERNAME}" | tr '[:upper:]' '[:lower:]')"
+          echo "::add-mask::${user}"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "image=${user}/gitlabmcp" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v4
+
+      - uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push linux/amd64 image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          # A flat single-platform manifest, not an OCI index wrapping a provenance attestation — keeps
+          # every pulled tag a plain image, which is what "version:arch" is promising the puller.
+          provenance: false
+          build-args: |
+            RID=linux-musl-x64
+            BUILD_CONFIGURATION=Release
+            APP_VERSION=${{ steps.meta.outputs.version }}
+          tags: |
+            ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.version }}-amd64
+            ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.version }}
+            ${{ steps.meta.outputs.image }}:latest-amd64
+            ${{ steps.meta.outputs.image }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  github-release:
+    name: Publish GitHub Release
+    needs: docker-release
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # full history so --generate-notes can diff against the previous tag
+
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE: ${{ needs.docker-release.outputs.image }}
+          VERSION: ${{ needs.docker-release.outputs.version }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "${GITHUB_REF_NAME}" \
+            --generate-notes \
+            --notes "Docker: \`docker pull ${IMAGE}:${VERSION}-amd64\` (also tagged \`${VERSION}\`, \`latest-amd64\`, \`latest\`)."

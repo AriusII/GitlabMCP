@@ -1,0 +1,31 @@
+# Example composition for a single GitlabMCP container. Copy this file, drop the ".example" mindset,
+# and edit the three lines marked below — everything else is a sane default (docker-aot-image skill §6/§7).
+#
+#   cp gitlab_token.txt.example gitlab_token.txt   # then put a real PAT in it, see the note below
+#   docker compose up -d
+#
+# The image is published by .github/workflows/release.yml on every "vX.Y.Z" tag, as
+# <dockerhub-user>/gitlabmcp:X.Y.Z-amd64 and :latest-amd64 (README.md "Container images").
+services:
+  gitlabmcp:
+    image: gitlabmcp:latest-amd64 # <-- replace with <your-dockerhub-user>/gitlabmcp:latest-amd64, or build locally
+    ports:
+      - "127.0.0.1:9080:9080" # loopback-only by default; widen deliberately, never bind 0.0.0.0 on the host side
+    environment:
+      # Which of the four profiles this container advertises (CLAUDE.md "Target architecture: profiles").
+      # Absent -> Maintainer. One of: Maintainer | Developer | DevOps | FullPermission.
+      GitLabMcp__Profile: Developer
+
+      # Absent -> https://gitlab.com/api/v4/. Point this at a self-hosted instance or a different domain
+      # instead — it must end in "api/v4/" exactly (checked at startup, fails fast with a clear message
+      # otherwise). A path-prefixed self-hosted install ("https://example.com/gitlab/api/v4/") and a
+      # non-standard port ("https://gitlab.internal:8443/api/v4/") both work the same way — no special
+      # syntax needed beyond standard URL rules. GitLabGraphQlEndpointTests pins down all of these cases.
+      GitLab__BaseAddress: "https://gitlab.com/api/v4/"
+    secrets:
+      - GitLab__AccessToken # mounted at /run/secrets/GitLab__AccessToken (DEC-013 Tier 2), never an env var here
+    restart: unless-stopped
+
+secrets:
+  GitLab__AccessToken:
+    file: ./gitlab_token.txt # printf '%s' "$YOUR_PAT" > gitlab_token.txt -- NOT echo, it appends a newline

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <ProjectReference Include="..\GitlabMCP.Abstractions\GitlabMCP.Abstractions.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- ToolCollection/PromptCollection removal, ProtocolTool.Annotations (DEC-006 readOnly check). -->
+        <PackageReference Include="ModelContextProtocol.Core"/>
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <ProjectReference Include="..\GitlabMCP.Abstractions\GitlabMCP.Abstractions.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- CallToolResult, McpJsonUtilities — the envelope/Wrap helper (DEC-007/DEC-009) lives here. -->
+        <PackageReference Include="ModelContextProtocol.Core"/>
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <ProjectReference Include="..\GitlabMCP.Mapping\GitlabMCP.Mapping.csproj"/>
+        <ProjectReference Include="..\GitlabMCP.GraphQL\GitlabMCP.GraphQL.csproj"/>
+        <ProjectReference Include="..\GitlabMCP.Contracts\GitlabMCP.Contracts.csproj"/>
+        <ProjectReference Include="..\GitlabMCP.Profiles\GitlabMCP.Profiles.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- [McpServerToolType]/[McpServerTool]/[McpServerPrompt] attributes. -->
+        <PackageReference Include="ModelContextProtocol.Core"/>
+        <!-- Narrow I<Resource>Client interfaces injected into tool constructors (CLAUDE.md: "inject the
+             narrow interfaces — it keeps the profile boundary visible"). -->
+        <PackageReference Include="GitLab.Client"/>
+    </ItemGroup>
+
+</Project>

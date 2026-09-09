@@ -1,0 +1,2290 @@
+{
+  "discussion": [
+    {
+      "name": "gitlab_list_discussions",
+      "client": "IDiscussionsClient",
+      "method": "ListForIssueAsync / ListForMergeRequestAsync / ListForCommitAsync / ListForSnippetAsync / ListForEpicAsync (dispatched by noteable_type)",
+      "readOnly": true,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabDiscussion",
+      "purpose": "List the threaded, resolvable discussion threads on an issue, MR, commit, snippet or epic (each entry includes its notes), bounded by limit."
+    },
+    {
+      "name": "gitlab_list_notes",
+      "client": "INotesClient",
+      "method": "ListIssueNotesAsync / ListMergeRequestNotesAsync / ListSnippetNotesAsync / ListVulnerabilityNotesAsync / ListProjectWikiPageNotesAsync / ListEpicNotesAsync / ListGroupWikiPageNotesAsync (dispatched by noteable_type)",
+      "readOnly": true,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabNote",
+      "purpose": "List the flat comments/system-notes on an issue, merge request, snippet, vulnerability, wiki page or epic, bounded by limit."
+    },
+    {
+      "name": "gitlab_list_draft_notes",
+      "client": "IDraftNotesClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabDraftNote",
+      "purpose": "List the caller's own pending, unpublished review comments on a merge request."
+    },
+    {
+      "name": "gitlab_list_reactions",
+      "client": "IAwardEmojiClient",
+      "method": "ListForIssueAsync / ListForIssueNoteAsync / ListForMergeRequestAsync / ListForMergeRequestNoteAsync / ListForSnippetAsync / ListForSnippetNoteAsync / ListForEpicAsync / ListForEpicNoteAsync (dispatched by target_type)",
+      "readOnly": true,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabAwardEmoji",
+      "purpose": "List the emoji reactions on an issue, MR, snippet, epic, or a note on any of them."
+    },
+    {
+      "name": "gitlab_render_markdown",
+      "client": "IMarkdownClient",
+      "method": "RenderAsync",
+      "readOnly": true,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabRenderedMarkdown",
+      "purpose": "Preview how GitLab Flavored Markdown (or plain CommonMark) will render to HTML, optionally resolving #/!/@/~ references against a project."
+    },
+    {
+      "name": "gitlab_list_events",
+      "client": "IEventsClient",
+      "method": "ListAsync / ListForProjectAsync / ListForUserAsync (dispatched by scope: me/project/user)",
+      "readOnly": true,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabEvent",
+      "purpose": "List recent activity-feed events for the caller, a project, or a user (not an audit log - excludes epic/MR events and is retention-limited)."
+    },
+    {
+      "name": "gitlab_get_discussion",
+      "client": "IDiscussionsClient",
+      "method": "GetForIssueAsync / GetForMergeRequestAsync / GetForCommitAsync / GetForSnippetAsync / GetForEpicAsync (dispatched by noteable_type)",
+      "readOnly": true,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabDiscussion",
+      "purpose": "Read one discussion thread and every note inside it in one call."
+    },
+    {
+      "name": "gitlab_create_discussion",
+      "client": "IDiscussionsClient",
+      "method": "CreateForIssueAsync / CreateForMergeRequestAsync / CreateForCommitAsync / CreateForSnippetAsync / CreateForEpicAsync (dispatched by noteable_type)",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabDiscussion",
+      "purpose": "Start a new resolvable discussion thread; on merge_request/commit, optionally anchor it to a diff line as a review comment."
+    },
+    {
+      "name": "gitlab_create_draft_note",
+      "client": "IDraftNotesClient",
+      "method": "CreateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabDraftNote",
+      "purpose": "Stage a review comment on a merge request without publishing it yet, optionally as a reply or resolving a discussion on publish."
+    },
+    {
+      "name": "gitlab_update_note",
+      "client": "INotesClient",
+      "method": "UpdateIssueNoteAsync / UpdateMergeRequestNoteAsync / UpdateSnippetNoteAsync / UpdateVulnerabilityNoteAsync / UpdateProjectWikiPageNoteAsync / UpdateEpicNoteAsync / UpdateGroupWikiPageNoteAsync (dispatched by noteable_type)",
+      "readOnly": false,
+      "destructive": true,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabNote",
+      "purpose": "Replace the body of an existing note the caller authored (or has maintainer rights over)."
+    },
+    {
+      "name": "gitlab_add_reaction",
+      "client": "IAwardEmojiClient",
+      "method": "AddToIssueAsync / AddToIssueNoteAsync / AddToMergeRequestAsync / AddToMergeRequestNoteAsync / AddToSnippetAsync / AddToSnippetNoteAsync / AddToEpicAsync / AddToEpicNoteAsync (dispatched by target_type)",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabAwardEmoji",
+      "purpose": "React with an emoji (name without colons) to an issue/MR/snippet/epic or a note on one."
+    },
+    {
+      "name": "gitlab_apply_suggestion",
+      "client": "ISuggestionsClient",
+      "method": "ApplyAsync",
+      "readOnly": false,
+      "destructive": true,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabSuggestion",
+      "purpose": "Apply one code suggestion from a review comment, committing it to the merge request's source branch. Caller must already have the suggestion id (not discoverable via this library's note model)."
+    }
+  ],
+  "mergerequests": [
+    {
+      "name": "gitlab_list_group_merge_requests",
+      "client": "IMergeRequestsClient",
+      "method": "ListForGroupAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabMergeRequest",
+      "purpose": "List merge requests across a group and all of its subgroups for a cross-project view."
+    },
+    {
+      "name": "gitlab_get_approval_settings",
+      "client": "IMergeRequestApprovalsClient",
+      "method": "GetApprovalConfigurationAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabProjectApprovalConfiguration",
+      "purpose": "Read the approval policy switches for a project or group -- author self-approval, committer approval, reset-approvals-on-push, and similar governance flags."
+    },
+    {
+      "name": "gitlab_list_approval_rules",
+      "client": "IApprovalRulesClient",
+      "method": "ListForProjectAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabApprovalRule",
+      "purpose": "List the standing approval rules configured on a project or group, to see what approvals a merge request will need before it can merge."
+    },
+    {
+      "name": "gitlab_list_merge_train",
+      "client": "IMergeTrainsClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabMergeTrainCar",
+      "purpose": "List the merge requests currently queued on a project's merge train(s), optionally filtered to one target branch."
+    },
+    {
+      "name": "gitlab_list_external_status_checks",
+      "client": "IExternalStatusChecksClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabExternalStatusCheck",
+      "purpose": "List the external status checks configured on a project, or (given a merge_request_iid) the live results of those checks against one merge request."
+    },
+    {
+      "name": "gitlab_list_merge_request_commits",
+      "client": "IMergeRequestsClient",
+      "method": "ListCommitsAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabCommit",
+      "purpose": "List the commits that make up a merge request."
+    },
+    {
+      "name": "gitlab_get_merge_request_approvals",
+      "client": "IMergeRequestApprovalsClient",
+      "method": "GetApprovalsAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabMergeRequestApprovals",
+      "purpose": "Check whether a merge request is approved, by whom, and which approval rules remain outstanding -- combines the approvers view (GetApprovalsAsync) and the rule-by-rule view (GetApprovalStateAsync) in one call."
+    },
+    {
+      "name": "gitlab_list_merge_request_pipelines",
+      "client": "IMergeRequestsClient",
+      "method": "ListPipelinesAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabPipeline",
+      "purpose": "List CI pipelines that have run for a merge request, to check merge-gate status before merging."
+    },
+    {
+      "name": "gitlab_list_merge_request_related_issues",
+      "client": "IMergeRequestsClient",
+      "method": "ListClosesIssuesAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabIssue",
+      "purpose": "List the issues a merge request will close on merge, or (via a relation switch) every issue it references, for traceability between planning and code."
+    },
+    {
+      "name": "gitlab_list_merge_request_reviewers",
+      "client": "IMergeRequestsClient",
+      "method": "ListReviewersAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabMergeRequestReviewer",
+      "purpose": "List a merge request's reviewers and each one's review state (unreviewed, reviewed, requested changes)."
+    },
+    {
+      "name": "gitlab_list_merge_requests",
+      "client": "IMergeRequestsClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabMergeRequest",
+      "purpose": "List a project's merge requests filtered by state/labels/branch/author/search, bounded by limit, for triage and status overview."
+    },
+    {
+      "name": "gitlab_create_merge_request",
+      "client": "IMergeRequestsClient",
+      "method": "CreateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabMergeRequest",
+      "purpose": "Open a new merge request from a source branch to a target branch with a title/description."
+    },
+    {
+      "name": "gitlab_create_approval_rule",
+      "client": "IApprovalRulesClient",
+      "method": "CreateForProjectAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabApprovalRule",
+      "purpose": "Create a standing approval rule on a project or group with named approvers/groups and a required approval count."
+    },
+    {
+      "name": "gitlab_approve_merge_request",
+      "client": "IMergeRequestApprovalsClient",
+      "method": "ApproveAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabMergeRequestApprovals",
+      "purpose": "Approve a merge request as the authenticated user."
+    },
+    {
+      "name": "gitlab_add_to_merge_train",
+      "client": "IMergeTrainsClient",
+      "method": "AddMergeRequestAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabMergeTrainCar",
+      "purpose": "Queue a merge request onto its target branch's merge train."
+    },
+    {
+      "name": "gitlab_update_merge_request",
+      "client": "IMergeRequestsClient",
+      "method": "UpdateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabMergeRequest",
+      "purpose": "Edit a merge request's title, description, labels, assignees, reviewers or milestone, or close/reopen it via the state event."
+    },
+    {
+      "name": "gitlab_update_approval_rule",
+      "client": "IApprovalRulesClient",
+      "method": "UpdateForProjectAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabApprovalRule",
+      "purpose": "Update a standing approval rule's approvers or required count; approver lists sent are authoritative and replace the existing list."
+    },
+    {
+      "name": "gitlab_unapprove_merge_request",
+      "client": "IMergeRequestApprovalsClient",
+      "method": "UnapproveAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabMergeRequestApprovals",
+      "purpose": "Withdraw the authenticated user's own approval from a merge request."
+    }
+  ],
+  "planning": [
+    {
+      "name": "gitlab_list_issue_links",
+      "client": "IIssuesClient",
+      "method": "ListLinksAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "IAsyncEnumerable<GitLabIssue>",
+      "purpose": "List the issues linked to this one (relates_to / blocks / is_blocked_by), each carrying its link id and link type."
+    },
+    {
+      "name": "gitlab_list_milestone_burndown_events",
+      "client": "IMilestonesClient",
+      "method": "ListBurndownEventsAsync, ListBurndownEventsForGroupAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "IAsyncEnumerable<GitLabBurndownEvent>",
+      "purpose": "List the burndown chart events of a milestone. Premium/Ultimate feature; expect a 403 on lower plans."
+    },
+    {
+      "name": "gitlab_list_board_lists",
+      "client": "IBoardsClient",
+      "method": "ListListsForProjectAsync, ListListsForGroupAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "IAsyncEnumerable<GitLabBoardList>",
+      "purpose": "List a board's lists (columns) in board order."
+    },
+    {
+      "name": "gitlab_list_labels",
+      "client": "ILabelsClient",
+      "method": "ListAsync, ListForGroupAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "IAsyncEnumerable<GitLabLabel|GitLabGroupLabel>",
+      "purpose": "List a project's or group's labels, optionally with issue/MR counts."
+    },
+    {
+      "name": "gitlab_list_resource_groups",
+      "client": "IResourceGroupsClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "IAsyncEnumerable<GitLabResourceGroup>",
+      "purpose": "List the CI/CD resource groups (deployment-concurrency mutexes) a project's pipelines have created."
+    },
+    {
+      "name": "gitlab_list_iterations",
+      "client": "IIterationsClient",
+      "method": "ListForGroupAsync, ListForProjectAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "IAsyncEnumerable<GitLabIteration>",
+      "purpose": "List the iterations visible to a group or project. Read-only: iterations are scheduled through cadences the REST API doesn't expose here; a project's iterations actually come from its ancestor groups."
+    },
+    {
+      "name": "gitlab_list_todos",
+      "client": "ITodosClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "IAsyncEnumerable<GitLabTodo>",
+      "purpose": "List the authenticated user's to-do items, filterable by action, author, project, group, state, or type. Pending items only with no filters."
+    },
+    {
+      "name": "gitlab_list_resource_events",
+      "client": "IResourceEventsClient",
+      "method": "ListIssueLabelEventsAsync, ListIssueStateEventsAsync, ListIssueMilestoneEventsAsync, ListIssueIterationEventsAsync, ListIssueWeightEventsAsync, ListMergeRequestLabelEventsAsync, ListMergeRequestStateEventsAsync, ListMergeRequestMilestoneEventsAsync, ListEpicLabelEventsAsync, ListEpicStateEventsAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "IAsyncEnumerable<GitLabResourceLabelEvent|GitLabResourceStateEvent|GitLabResourceMilestoneEvent|GitLabResourceIterationEvent|GitLabResourceWeightEvent>",
+      "purpose": "List the machine-readable change history (label, state, milestone, iteration, or weight events) of an issue, merge request, or epic. Not every family exists for every eventable type: issues have all five, merge requests have label/state/milestone only, epics have label/state only."
+    },
+    {
+      "name": "gitlab_list_issue_participants",
+      "client": "IIssuesClient",
+      "method": "ListParticipantsAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "IAsyncEnumerable<GitLabUser>",
+      "purpose": "List the users participating in an issue's discussion."
+    },
+    {
+      "name": "gitlab_list_milestone_issues",
+      "client": "IMilestonesClient",
+      "method": "ListIssuesAsync, ListIssuesForGroupAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "IAsyncEnumerable<GitLabIssue>",
+      "purpose": "List every issue assigned to a milestone."
+    },
+    {
+      "name": "gitlab_list_boards",
+      "client": "IBoardsClient",
+      "method": "ListForProjectAsync, ListForGroupAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "IAsyncEnumerable<GitLabBoard>",
+      "purpose": "List a project's or group's issue boards."
+    },
+    {
+      "name": "gitlab_get_label",
+      "client": "ILabelsClient",
+      "method": "GetAsync, GetForGroupAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabLabel|GitLabGroupLabel",
+      "purpose": "Get one label by name (or numeric id) at project or group scope."
+    },
+    {
+      "name": "gitlab_create_issue",
+      "client": "IIssuesClient",
+      "method": "CreateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabIssue",
+      "purpose": "Create a new issue with title, description, labels, assignees, milestone, due/start date, weight, confidentiality and type."
+    },
+    {
+      "name": "gitlab_create_board",
+      "client": "IBoardsClient",
+      "method": "CreateForProjectAsync, CreateForGroupAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabBoard",
+      "purpose": "Create a new issue board."
+    },
+    {
+      "name": "gitlab_create_milestone",
+      "client": "IMilestonesClient",
+      "method": "CreateAsync, CreateForGroupAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabMilestone",
+      "purpose": "Create a milestone with a title, description, and start/due dates at project or group scope."
+    },
+    {
+      "name": "gitlab_create_label",
+      "client": "ILabelsClient",
+      "method": "CreateAsync, CreateForGroupAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabLabel|GitLabGroupLabel",
+      "purpose": "Create a label with a name and color (and, at project scope, a priority) at project or group scope."
+    },
+    {
+      "name": "gitlab_create_todo",
+      "client": "ITodosClient",
+      "method": "CreateForIssueAsync, CreateForMergeRequestAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabTodo",
+      "purpose": "Create a to-do item for yourself on an issue or merge request."
+    },
+    {
+      "name": "gitlab_set_issue_subscription",
+      "client": "IResourceSubscriptionsClient",
+      "method": "SubscribeToIssueAsync, UnsubscribeFromIssueAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabIssue",
+      "purpose": "Subscribe or unsubscribe the authenticated user to an issue's notifications."
+    },
+    {
+      "name": "gitlab_set_resource_group_process_mode",
+      "client": "IResourceGroupsClient",
+      "method": "UpdateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabResourceGroup",
+      "purpose": "Change the order in which a resource group releases queued jobs (e.g. unordered / oldest_first / newest_first)."
+    },
+    {
+      "name": "gitlab_update_issue",
+      "client": "IIssuesClient",
+      "method": "UpdateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabIssue",
+      "purpose": "Apply a partial update to an issue's fields (title, description, labels, assignees, milestone, weight, severity, confidentiality, dates) without touching its open/closed state."
+    }
+  ],
+  "code": [
+    {
+      "name": "gitlab_list_commit_comments",
+      "client": "ICommitsClient",
+      "method": "ListCommentsAsync",
+      "readOnly": true,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabCommitComment",
+      "purpose": "Read line- or commit-level comments left on a commit."
+    },
+    {
+      "name": "gitlab_list_repository_contributors",
+      "client": "IRepositoriesClient",
+      "method": "ListContributorsAsync",
+      "readOnly": true,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabContributor",
+      "purpose": "Per-author commit and line-change counts, for activity or ownership questions."
+    },
+    {
+      "name": "gitlab_get_file_blame",
+      "client": "IRepositoryFilesClient",
+      "method": "GetBlameAsync",
+      "readOnly": true,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabBlameRange",
+      "purpose": "Find which commit and author last touched each line of a file, optionally scoped to a line range."
+    },
+    {
+      "name": "gitlab_list_branches",
+      "client": "IBranchesClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabBranch",
+      "purpose": "List a project's branches, optionally filtered by name or regex."
+    },
+    {
+      "name": "gitlab_list_tags",
+      "client": "ITagsClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabTag",
+      "purpose": "List a project's tags."
+    },
+    {
+      "name": "gitlab_list_commit_statuses",
+      "client": "ICommitStatusesClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabCommitStatus",
+      "purpose": "See what external CI systems have reported for a commit."
+    },
+    {
+      "name": "gitlab_list_protected_branches",
+      "client": "IProtectedBranchesClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "profiles": [
+        "Maintainer",
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabProtectedBranch",
+      "purpose": "See which branches or wildcard patterns are protected and who may push, merge or unprotect them."
+    },
+    {
+      "name": "gitlab_list_protected_tags",
+      "client": "IProtectedTagsClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "profiles": [
+        "Maintainer",
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabProtectedTag",
+      "purpose": "See which tags or wildcard patterns are protected and who may create matching tags."
+    },
+    {
+      "name": "gitlab_get_push_rule",
+      "client": "IPushRulesClient",
+      "method": "GetForProjectAsync",
+      "readOnly": true,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabProjectPushRule",
+      "purpose": "Read a project's push rule \u2014 commit-message/branch-name regexes, secret detection, signing requirements."
+    },
+    {
+      "name": "gitlab_get_pull_mirror",
+      "client": "IProjectMirrorsClient",
+      "method": "GetAsync",
+      "readOnly": true,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabPullMirror",
+      "purpose": "Check a project's pull-mirror configuration and last sync status."
+    },
+    {
+      "name": "gitlab_create_commit",
+      "client": "ICommitsClient",
+      "method": "CreateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabCommit",
+      "purpose": "Commit several file create/update/delete/move/chmod actions atomically in one push, without a local git checkout."
+    },
+    {
+      "name": "gitlab_create_file",
+      "client": "IRepositoryFilesClient",
+      "method": "CreateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabRepositoryFile",
+      "purpose": "Create a new file and commit it directly to a branch, no local checkout needed."
+    },
+    {
+      "name": "gitlab_create_branch",
+      "client": "IBranchesClient",
+      "method": "CreateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabBranch",
+      "purpose": "Create a branch from a ref (branch, tag or commit SHA)."
+    },
+    {
+      "name": "gitlab_create_tag",
+      "client": "ITagsClient",
+      "method": "CreateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabTag",
+      "purpose": "Tag a ref, optionally as an annotated tag carrying a release message."
+    },
+    {
+      "name": "gitlab_protect_branch",
+      "client": "IProtectedBranchesClient",
+      "method": "ProtectAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabProtectedBranch",
+      "purpose": "Protect a branch or wildcard pattern with role-, user- or group-grained push/merge/unprotect rules."
+    },
+    {
+      "name": "gitlab_protect_tag",
+      "client": "IProtectedTagsClient",
+      "method": "ProtectAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabProtectedTag",
+      "purpose": "Protect a tag or wildcard pattern so only specific roles may create matching tags."
+    }
+  ],
+  "people": [
+    {
+      "name": "gitlab_list_enterprise_users",
+      "client": "IUsersClient",
+      "method": "ListEnterpriseUsersAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabUser",
+      "purpose": "List, or get one by id, the SAML/SCIM-provisioned enterprise users claimed by a group."
+    },
+    {
+      "name": "gitlab_list_impersonation_tokens",
+      "client": "IPersonalAccessTokensClient",
+      "method": "ListImpersonationTokensAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "AdminOnly"
+      ],
+      "returns": "GitLabImpersonationToken",
+      "purpose": "List, or get one by id, a user's impersonation tokens."
+    },
+    {
+      "name": "gitlab_list_members",
+      "client": "IMembersClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer",
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabMember",
+      "purpose": "List a project's or group's members, direct or including inherited/invited-group memberships, bounded by limit."
+    },
+    {
+      "name": "gitlab_list_ssh_keys",
+      "client": "ISshKeysClient",
+      "method": "ListForCurrentUserAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer",
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabSshKey",
+      "purpose": "List the caller's SSH keys, or another user's (served without authentication by GitLab)."
+    },
+    {
+      "name": "gitlab_list_resource_access_tokens",
+      "client": "IAccessTokensClient",
+      "method": "ListForProjectAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabAccessToken",
+      "purpose": "List a project's or group's access tokens (bot-account tokens scoped to that resource)."
+    },
+    {
+      "name": "gitlab_list_service_accounts",
+      "client": "IServiceAccountsClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabServiceAccount",
+      "purpose": "List service accounts at instance, group, or project scope."
+    },
+    {
+      "name": "gitlab_list_member_roles",
+      "client": "IMemberRolesClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabMemberRole",
+      "purpose": "List custom member roles at instance, group, or instance-admin-role scope."
+    },
+    {
+      "name": "gitlab_list_access_requests",
+      "client": "IAccessRequestsClient",
+      "method": "ListForProjectAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer",
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabAccessRequest",
+      "purpose": "List pending access requests on a project or group."
+    },
+    {
+      "name": "gitlab_update_group_member_state",
+      "client": "IMembersClient",
+      "method": "UpdateStateForGroupAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "none",
+      "purpose": "Move a user's group membership between Awaiting and Active state to free or reclaim a paid seat."
+    },
+    {
+      "name": "gitlab_create_impersonation_token",
+      "client": "IPersonalAccessTokensClient",
+      "method": "CreateImpersonationTokenAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "AdminOnly"
+      ],
+      "returns": "GitLabImpersonationTokenWithSecret",
+      "purpose": "Create a token that acts as another user for both API calls and Git \u2014 the most privileged credential this server can mint; the plaintext secret is shown only once."
+    },
+    {
+      "name": "gitlab_create_current_user_runner",
+      "client": "ICurrentUserClient",
+      "method": "CreateRunnerAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabRunnerRegistration",
+      "purpose": "Register a new CI/CD runner owned by the caller; the returned registration token is shown once and must be persisted immediately."
+    },
+    {
+      "name": "gitlab_update_enterprise_user",
+      "client": "IUsersClient",
+      "method": "UpdateEnterpriseUserAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabUser",
+      "purpose": "Update an enterprise user's name, email or project limit, or disable their two-factor authentication."
+    },
+    {
+      "name": "gitlab_create_invitation",
+      "client": "IInvitationsClient",
+      "method": "CreateForProjectAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabInvitation",
+      "purpose": "Invite one or more people, by email or user id, to a project or group at a given access level."
+    },
+    {
+      "name": "gitlab_create_resource_access_token",
+      "client": "IAccessTokensClient",
+      "method": "CreateForProjectAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabAccessTokenWithSecret",
+      "purpose": "Create a project or group access token with chosen scopes and access level; the plaintext token is returned only once."
+    }
+  ],
+  "projects": [
+    {
+      "name": "gitlab_list_group_issues",
+      "client": "IGroupsClient",
+      "method": "ListIssuesAsync",
+      "readOnly": true,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabIssue",
+      "purpose": "List issues across a group and its subgroups, filtered by state, labels, assignee, milestone, iteration, weight, etc."
+    },
+    {
+      "name": "gitlab_list_project_forks",
+      "client": "IProjectsClient",
+      "method": "ListForksAsync",
+      "readOnly": true,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabProject",
+      "purpose": "List a project's forks."
+    },
+    {
+      "name": "gitlab_list_namespace_storage_limit_exclusions",
+      "client": "INamespacesClient",
+      "method": "ListStorageLimitExclusionsAsync",
+      "readOnly": true,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabNamespaceStorageLimitExclusion",
+      "purpose": "List every namespace instance-wide that's excluded from storage-limit enforcement."
+    },
+    {
+      "name": "gitlab_list_project_uploads",
+      "client": "IProjectUploadsClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabProjectUpload",
+      "purpose": "List markdown-attachment uploads on a project (requires Maintainer or Owner role)."
+    },
+    {
+      "name": "gitlab_list_project_aliases",
+      "client": "IProjectAliasesClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabProjectAlias",
+      "purpose": "List every Git-level project alias on the instance (Premium/Ultimate, administrators only)."
+    },
+    {
+      "name": "gitlab_list_topics",
+      "client": "ITopicsClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabTopic",
+      "purpose": "List instance-wide project topics, sorted by how many projects carry each one."
+    },
+    {
+      "name": "gitlab_list_badges",
+      "client": "IBadgesClient",
+      "method": "ListForProjectAsync",
+      "readOnly": true,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabBadge",
+      "purpose": "List a project's or group's badges, including group-inherited ones on a project (wraps ListForGroupAsync)."
+    },
+    {
+      "name": "gitlab_list_custom_attributes",
+      "client": "ICustomAttributesClient",
+      "method": "ListForProjectAsync",
+      "readOnly": true,
+      "profiles": [
+        "AdminOnly"
+      ],
+      "returns": "GitLabCustomAttribute",
+      "purpose": "List custom key/value attributes on a user, group, or project, selected by entity_type (wraps ListForUserAsync/ListForGroupAsync); administrator-only, reads included."
+    },
+    {
+      "name": "gitlab_get_avatar_url_for_email",
+      "client": "IAvatarsClient",
+      "method": "GetForEmailAsync",
+      "readOnly": true,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabAvatar",
+      "purpose": "Resolve the avatar image URL GitLab would serve for a public email address; always answers 200, so this is not proof the account exists."
+    },
+    {
+      "name": "gitlab_list_storage_moves",
+      "client": "IStorageMovesClient",
+      "method": "ListForProjectAsync",
+      "readOnly": true,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabProjectRepositoryStorageMove",
+      "purpose": "List Gitaly repository-storage moves for a project, group, or snippet, or instance-wide when no entity id is given (wraps ListAllProjectMovesAsync/ListForGroupAsync/ListForSnippetAsync and group/snippet equivalents); self-managed instances only."
+    },
+    {
+      "name": "gitlab_list_group_projects",
+      "client": "IGroupsClient",
+      "method": "ListProjectsAsync",
+      "readOnly": true,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabProject",
+      "purpose": "List projects a group owns, or projects shared into it, selected by a shared:bool (wraps ListSharedProjectsAsync)."
+    },
+    {
+      "name": "gitlab_create_ci_config_merge_request",
+      "client": "IProjectsClient",
+      "method": "CreateCiConfigMergeRequestAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabMergeRequest",
+      "purpose": "Open a merge request that adds a starter .gitlab-ci.yml to a project with none."
+    },
+    {
+      "name": "gitlab_create_group",
+      "client": "IGroupsClient",
+      "method": "CreateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabGroup",
+      "purpose": "Create a top-level group, or a subgroup when a parent group is given."
+    },
+    {
+      "name": "gitlab_delete_topic",
+      "client": "ITopicsClient",
+      "method": "DeleteAsync",
+      "readOnly": false,
+      "destructive": true,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "void",
+      "purpose": "Delete a topic; projects that carried it simply lose the label."
+    },
+    {
+      "name": "gitlab_create_badge",
+      "client": "IBadgesClient",
+      "method": "CreateForProjectAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabBadge",
+      "purpose": "Add a badge to a project or group (wraps CreateForGroupAsync); group badges are inherited by every project under it."
+    },
+    {
+      "name": "gitlab_delete_project_upload",
+      "client": "IProjectUploadsClient",
+      "method": "DeleteAsync",
+      "readOnly": false,
+      "destructive": true,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "void",
+      "purpose": "Delete a project upload by numeric id or by secret+filename (wraps DeleteBySecretAsync)."
+    },
+    {
+      "name": "gitlab_create_project_alias",
+      "client": "IProjectAliasesClient",
+      "method": "CreateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabProjectAlias",
+      "purpose": "Create an alias so an imported project keeps answering to its old Git name."
+    },
+    {
+      "name": "gitlab_set_custom_attribute",
+      "client": "ICustomAttributesClient",
+      "method": "SetForProjectAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "AdminOnly"
+      ],
+      "returns": "GitLabCustomAttribute",
+      "purpose": "Create or overwrite a custom attribute on a user, group, or project (wraps SetForUserAsync/SetForGroupAsync)."
+    }
+  ],
+  "cicd": [
+    {
+      "name": "gitlab_list_my_pipelines",
+      "client": "IPipelinesClient",
+      "method": "ListForCurrentUserAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabPipeline",
+      "purpose": "List pipelines the authenticated token's user triggered, across every project they can see."
+    },
+    {
+      "name": "gitlab_list_jobs",
+      "client": "IJobsClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabJob",
+      "purpose": "List a project's jobs across pipelines, filterable by status/scope and ref."
+    },
+    {
+      "name": "gitlab_list_pipeline_schedule_pipelines",
+      "client": "IPipelineSchedulesClient",
+      "method": "ListPipelinesAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabPipeline",
+      "purpose": "List the pipelines a given schedule has triggered, to confirm it is actually firing."
+    },
+    {
+      "name": "gitlab_list_ci_variables",
+      "client": "IVariablesClient",
+      "method": "ListProjectVariablesAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabVariable",
+      "purpose": "List the CI/CD variables defined on a project or group (scope parameter selects ListGroupVariablesAsync); values are already GitLab-redacted where masked."
+    },
+    {
+      "name": "gitlab_list_job_artifacts",
+      "client": "IJobArtifactsClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabJobArtifactEntry",
+      "purpose": "List the files inside a job's artifacts archive to find the exact path to fetch."
+    },
+    {
+      "name": "gitlab_list_triggers",
+      "client": "ITriggersClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabTrigger",
+      "purpose": "List the pipeline trigger tokens configured on a project."
+    },
+    {
+      "name": "gitlab_list_job_token_allowlist",
+      "client": "IJobTokenScopeClient",
+      "method": "ListAllowlistAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabProject (project) / GitLabJobTokenScopeGroup (group)",
+      "purpose": "List the projects or groups allowed to authenticate against this project using its CI job token (kind parameter selects ListGroupsAllowlistAsync)."
+    },
+    {
+      "name": "gitlab_validate_ci_config",
+      "client": "ICiLintClient",
+      "method": "ValidateAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabCiLintResult",
+      "purpose": "Lint a .gitlab-ci.yml \u2014 either content you supply or, when omitted, what's already committed via ValidateProjectConfigurationAsync \u2014 returning validity, errors and the merged/expanded YAML. Never throws for invalid YAML; check the Valid field."
+    },
+    {
+      "name": "gitlab_list_pipeline_bridge_jobs",
+      "client": "IPipelinesClient",
+      "method": "ListTriggerJobsAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabJob",
+      "purpose": "List the bridge jobs that start downstream pipelines from this one, to trace multi-project pipeline chains."
+    },
+    {
+      "name": "gitlab_list_pipeline_jobs",
+      "client": "IJobsClient",
+      "method": "ListForPipelineAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabJob",
+      "purpose": "List the jobs that belong to one pipeline, to see per-stage pass/fail status."
+    },
+    {
+      "name": "gitlab_create_pipeline_schedule",
+      "client": "IPipelineSchedulesClient",
+      "method": "CreateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabPipelineSchedule",
+      "purpose": "Create a new cron-triggered pipeline schedule for a ref."
+    },
+    {
+      "name": "gitlab_create_ci_variable",
+      "client": "IVariablesClient",
+      "method": "CreateProjectVariableAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabVariable",
+      "purpose": "Create a new CI/CD variable on a project or group (also covers CreateGroupVariableAsync)."
+    },
+    {
+      "name": "gitlab_create_pipeline",
+      "client": "IPipelinesClient",
+      "method": "CreateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabPipeline",
+      "purpose": "Trigger a new pipeline run for a branch, tag or commit ref."
+    },
+    {
+      "name": "gitlab_cancel_job",
+      "client": "IJobsClient",
+      "method": "CancelAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabJob",
+      "purpose": "Cancel a running or pending job."
+    },
+    {
+      "name": "gitlab_create_trigger",
+      "client": "ITriggersClient",
+      "method": "CreateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabTrigger",
+      "purpose": "Create a new pipeline trigger token; its value is only ever shown in full at creation."
+    },
+    {
+      "name": "gitlab_delete_all_project_artifacts",
+      "client": "IJobArtifactsClient",
+      "method": "DeleteAllAsync",
+      "readOnly": false,
+      "destructive": true,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "void (Task)",
+      "purpose": "Delete the artifacts of every job in a project (Maintainer+ role); GitLab processes the deletion in the background."
+    }
+  ],
+  "packages": [
+    {
+      "name": "gitlab_list_group_packages",
+      "client": "IPackagesGenericClient",
+      "method": "ListPackagesForGroupAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabPackage",
+      "purpose": "Same cross-format browse as gitlab_list_packages but across every project in a group, e.g. an org-wide 'what have we published' sweep."
+    },
+    {
+      "name": "gitlab_list_container_repositories",
+      "client": "IContainerRegistryClient",
+      "method": "ListForProjectAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabRegistryRepository",
+      "purpose": "List a project's container image repositories, optionally with tag counts and total size, to see what images the project publishes."
+    },
+    {
+      "name": "gitlab_list_debian_distributions",
+      "client": "IPackagesDebianClient",
+      "method": "ListDistributionsForProjectAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabDebianDistribution",
+      "purpose": "List a project's Debian (APT) repository distributions/codenames, e.g. to see which suites (stable, bullseye-security) are configured."
+    },
+    {
+      "name": "gitlab_list_terraform_module_versions",
+      "client": "IPackagesTerraformModulesClient",
+      "method": "ListModuleVersionsAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabTerraformModuleVersionList",
+      "purpose": "List every published version of a Terraform module with its dependency metadata, e.g. to decide which version a consumer should pin to."
+    },
+    {
+      "name": "gitlab_list_package_protection_rules",
+      "client": "IProjectPackageProtectionRulesClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabPackageProtectionRule",
+      "purpose": "List a project's package protection rules \u2014 which package name patterns, by format, only Maintainer+ (or Owner+ for delete) may push or delete."
+    },
+    {
+      "name": "gitlab_list_container_registry_protection_rules",
+      "client": "IProjectContainerRegistryProtectionRulesClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabContainerRegistryProtectionRule",
+      "purpose": "List a project's container repository protection rules \u2014 which image repository path patterns only Maintainer+/Owner+ may push to or delete from."
+    },
+    {
+      "name": "gitlab_delete_package",
+      "client": "IPackagesGenericClient",
+      "method": "DeletePackageAsync",
+      "readOnly": false,
+      "destructive": true,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "void (Task)",
+      "purpose": "Remove a package and every file it owns from the registry, regardless of format \u2014 e.g. purging a bad or leaked release."
+    },
+    {
+      "name": "gitlab_delete_container_repository",
+      "client": "IContainerRegistryClient",
+      "method": "DeleteRepositoryAsync",
+      "readOnly": false,
+      "destructive": true,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "void (Task)",
+      "purpose": "Delete an entire container repository and every image tag it holds \u2014 decommissioning an image entirely."
+    },
+    {
+      "name": "gitlab_create_package_protection_rule",
+      "client": "IProjectPackageProtectionRulesClient",
+      "method": "CreateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabPackageProtectionRule",
+      "purpose": "Lock down a package name pattern (e.g. 'release-*' for npm) so only roles at or above a chosen level can push or delete matching packages."
+    },
+    {
+      "name": "gitlab_create_container_registry_protection_rule",
+      "client": "IProjectContainerRegistryProtectionRulesClient",
+      "method": "CreateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabContainerRegistryProtectionRule",
+      "purpose": "Protect a container repository path pattern so only roles at or above a chosen level can push images to or delete images from repositories matching it."
+    }
+  ],
+  "search": [
+    {
+      "name": "gitlab_list_search_migrations",
+      "client": "ISearchClient",
+      "method": "ListSearchMigrationsAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "AdminOnly"
+      ],
+      "returns": "JsonElement",
+      "purpose": "List every advanced-search (Elasticsearch) migration known to the instance, for diagnosing search-index health. Admin token required."
+    },
+    {
+      "name": "gitlab_list_all_snippets",
+      "client": "ISnippetsClient",
+      "method": "ListAllAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "AdminOnly"
+      ],
+      "returns": "GitLabSnippet",
+      "purpose": "List every snippet on the instance, personal and project alike. Requires Administrator or Auditor access."
+    },
+    {
+      "name": "gitlab_list_license_templates",
+      "client": "ITemplatesClient",
+      "method": "ListLicensesAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabLicenseTemplate",
+      "purpose": "List available open-source license templates with metadata (key, name, popular flag); set popular-only to get the short common list."
+    },
+    {
+      "name": "gitlab_list_code_review_analytics",
+      "client": "IAnalyticsClient",
+      "method": "ListCodeReviewAnalyticsAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabCodeReviewAnalyticsItem",
+      "purpose": "Stream code-review metrics (review time, approver, diff stats) for a project's open merge requests, bounded by limit \u2014 for spotting stalled or slow-reviewed MRs."
+    },
+    {
+      "name": "gitlab_list_wiki_pages",
+      "client": "IWikisClient",
+      "method": "ListForProjectAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabWikiPage",
+      "purpose": "List a project's or group's wiki pages (title/slug/format), optionally with content included; picks ListForGroupAsync when a group is given instead of a project."
+    },
+    {
+      "name": "gitlab_list_code_search_indexed_namespaces",
+      "client": "ICodeSearchClient",
+      "method": "ListIndexedNamespacesAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabZoektIndexedNamespace",
+      "purpose": "List every namespace indexed on one Zoekt exact-code-search node."
+    },
+    {
+      "name": "gitlab_list_knowledge_graph_namespaces",
+      "client": "IKnowledgeGraphClient",
+      "method": "ListNamespacesAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabKnowledgeGraphNamespace",
+      "purpose": "List every namespace with GitLab Duo Knowledge Graph enabled on this instance."
+    },
+    {
+      "name": "gitlab_update_active_context_collection",
+      "client": "IActiveContextClient",
+      "method": "UpdateCollectionAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabActiveContextCollectionDetail",
+      "purpose": "Adjust an ActiveContext collection's queue-sharding options (shard count/limit) for scaling its indexing throughput."
+    },
+    {
+      "name": "gitlab_create_wiki_page",
+      "client": "IWikisClient",
+      "method": "CreateForProjectAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Maintainer",
+        "Developer"
+      ],
+      "returns": "GitLabWikiPage",
+      "purpose": "Create a new wiki page (title + markdown content) in a project's or group's wiki."
+    },
+    {
+      "name": "gitlab_add_code_search_indexed_namespace",
+      "client": "ICodeSearchClient",
+      "method": "AddIndexedNamespaceAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabZoektIndexedNamespace",
+      "purpose": "Add a namespace to a Zoekt node's exact-code-search index."
+    },
+    {
+      "name": "gitlab_create_snippet",
+      "client": "ISnippetsClient",
+      "method": "CreateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer"
+      ],
+      "returns": "GitLabSnippet",
+      "purpose": "Create a personal snippet, or a project snippet (CreateForProjectAsync, Visibility required there) when a project is given."
+    },
+    {
+      "name": "gitlab_disable_knowledge_graph_namespace",
+      "client": "IKnowledgeGraphClient",
+      "method": "DisableNamespaceAsync",
+      "readOnly": false,
+      "destructive": true,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "void",
+      "purpose": "Disable GitLab Duo Knowledge Graph for a namespace, removing its graph indexing."
+    }
+  ],
+  "infra": [
+    {
+      "name": "gitlab_list_dependencies",
+      "client": "IDependenciesClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabDependency",
+      "purpose": "List the dependencies (versions, package managers, known vulnerabilities/licenses) the last dependency-scanning job found in a project."
+    },
+    {
+      "name": "gitlab_list_cluster_agent_tokens",
+      "client": "IClusterAgentsClient",
+      "method": "ListTokensAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabClusterAgentToken",
+      "purpose": "List an agent's active authentication tokens (metadata only, never the secret) to audit what is authorized to connect."
+    },
+    {
+      "name": "gitlab_list_terraform_state_protection_rules",
+      "client": "ITerraformStatesClient",
+      "method": "ListProtectionRulesAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabTerraformStateProtectionRule",
+      "purpose": "List the write-access protection rules configured for a project's Terraform states."
+    },
+    {
+      "name": "gitlab_list_error_tracking_client_keys",
+      "client": "IErrorTrackingClient",
+      "method": "ListClientKeysAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabErrorTrackingClientKey",
+      "purpose": "List the client keys issued for a project's integrated error tracking, to audit what is currently allowed to report errors in."
+    },
+    {
+      "name": "gitlab_download_attestation",
+      "client": "IAttestationsClient",
+      "method": "DownloadAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabFileResponse",
+      "purpose": "Download one attestation's raw provenance bundle by its project-scoped id, for offline signature/provenance verification."
+    },
+    {
+      "name": "gitlab_create_terraform_state_protection_rule",
+      "client": "ITerraformStatesClient",
+      "method": "CreateProtectionRuleAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabTerraformStateProtectionRule",
+      "purpose": "Restrict who can write a named Terraform state to a minimum access level, optionally CI-only or protected-branch-CI-only."
+    },
+    {
+      "name": "gitlab_create_cluster_agent_token",
+      "client": "IClusterAgentsClient",
+      "method": "CreateTokenAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabClusterAgentTokenWithSecret",
+      "purpose": "Issue a new authentication token for a cluster agent (max 2 active); the plaintext secret is returned exactly once for deploying to the agent."
+    },
+    {
+      "name": "gitlab_create_error_tracking_client_key",
+      "client": "IErrorTrackingClient",
+      "method": "CreateClientKeyAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabErrorTrackingClientKey",
+      "purpose": "Issue a new client key (with an auto-generated public key/DSN) for an application to report errors into GitLab's integrated error tracking."
+    }
+  ],
+  "deploy": [
+    {
+      "name": "gitlab_list_group_releases",
+      "client": "IReleasesClient",
+      "method": "ListForGroupAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "Maintainer"
+      ],
+      "returns": "GitLabRelease",
+      "purpose": "List releases across every project in a group, optionally in a simplified shape."
+    },
+    {
+      "name": "gitlab_list_admin_runners",
+      "client": "IRunnersClient",
+      "method": "ListAllAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabRunner",
+      "purpose": "List every runner on the instance (admin/auditor only) for fleet-wide capacity or compliance review."
+    },
+    {
+      "name": "gitlab_list_instance_pages_domains",
+      "client": "IPagesClient",
+      "method": "ListAllDomainsAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabPagesDomainSummary",
+      "purpose": "List every Pages domain on the instance with its owning project and whether its certificate has expired (admin only)."
+    },
+    {
+      "name": "gitlab_list_runner_controller_scopes",
+      "client": "IRunnerControllersClient",
+      "method": "ListScopesAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabRunnerControllerScope",
+      "purpose": "List what a controller currently governs - the whole instance (RunnerId null) or specific runners."
+    },
+    {
+      "name": "gitlab_list_deployment_merge_requests",
+      "client": "IDeploymentsClient",
+      "method": "ListMergeRequestsAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "Developer"
+      ],
+      "returns": "GitLabMergeRequest",
+      "purpose": "List the merge requests GitLab associates with a deployment, to see what code shipped in it."
+    },
+    {
+      "name": "gitlab_list_admin_deploy_keys",
+      "client": "IDeployKeysClient",
+      "method": "ListAllAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabDeployKey",
+      "purpose": "List every deploy key on the instance, or (given a user id) every project deploy key accessible to one user; admin only. Also covers ListForUserAsync."
+    },
+    {
+      "name": "gitlab_list_admin_deploy_tokens",
+      "client": "IDeployTokensClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabDeployToken",
+      "purpose": "List every deploy token on the instance (admin only)."
+    },
+    {
+      "name": "gitlab_list_secure_files",
+      "client": "ISecureFilesClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabSecureFile",
+      "purpose": "List a project's secure files (CI/CD signing certificates, provisioning profiles, etc.) by metadata only."
+    },
+    {
+      "name": "gitlab_create_runner_controller_token",
+      "client": "IRunnerControllersClient",
+      "method": "CreateTokenAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabRunnerControllerToken",
+      "purpose": "Create a new token record for a controller (metadata only - rotate it afterward to obtain a usable secret)."
+    },
+    {
+      "name": "gitlab_create_release",
+      "client": "IReleasesClient",
+      "method": "CreateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "Developer"
+      ],
+      "returns": "GitLabRelease",
+      "purpose": "Cut a new release from a tag, with notes and linked milestones."
+    },
+    {
+      "name": "gitlab_update_runner",
+      "client": "IRunnersClient",
+      "method": "UpdateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabRunner",
+      "purpose": "Change a runner's description, tags, pause state, lock or timeout without recreating it."
+    },
+    {
+      "name": "gitlab_create_environment",
+      "client": "IEnvironmentsClient",
+      "method": "CreateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabEnvironment",
+      "purpose": "Register a new deployment environment on a project."
+    },
+    {
+      "name": "gitlab_create_pages_domain",
+      "client": "IPagesClient",
+      "method": "CreateDomainAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabPagesDomain",
+      "purpose": "Add a custom domain to a project's Pages site, with a supplied certificate or via Let's Encrypt auto-SSL."
+    },
+    {
+      "name": "gitlab_create_instance_deploy_key",
+      "client": "IDeployKeysClient",
+      "method": "CreateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabDeployKey",
+      "purpose": "Create a deploy key directly on the instance (admin only), unattached to any project until enabled there."
+    }
+  ],
+  "admin": [
+    {
+      "name": "gitlab_get_instance_appearance",
+      "client": "IInstanceClient",
+      "method": "GetAppearanceAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "AdminOnly"
+      ],
+      "returns": "GitLabAppearance",
+      "purpose": "View the instance-wide sign-in/sign-up branding (logo, colors, messages)."
+    },
+    {
+      "name": "gitlab_list_feature_flag_user_lists",
+      "client": "IFeatureFlagsClient",
+      "method": "ListUserListsAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabFeatureFlagUserList",
+      "purpose": "List a project's feature flag user lists (bounded)."
+    },
+    {
+      "name": "gitlab_list_license_policies",
+      "client": "ILicensesClient",
+      "method": "ListManagedAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabManagedLicense",
+      "purpose": "List a project's software license compliance policies (allowed/denied verdicts), bounded."
+    },
+    {
+      "name": "gitlab_list_group_integrations",
+      "client": "IIntegrationsClient",
+      "method": "ListForGroupAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabIntegration",
+      "purpose": "List a group's active third-party integrations, bounded."
+    },
+    {
+      "name": "gitlab_list_background_migration_operations",
+      "client": "IBackgroundMigrationsClient",
+      "method": "ListOperationsAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabBatchedBackgroundOperation",
+      "purpose": "List batched background operations on the instance (bounded) \u2014 the finer-grained unit a migration is made of."
+    },
+    {
+      "name": "gitlab_list_audit_events",
+      "client": "IAuditEventsClient",
+      "method": "ListAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "AdminOnly"
+      ],
+      "returns": "GitLabAuditEvent",
+      "purpose": "List the instance-wide audit log, optionally filtered by entity type/id or date range (bounded). Requires administrator access."
+    },
+    {
+      "name": "gitlab_list_project_hook_deliveries",
+      "client": "IProjectHooksClient",
+      "method": "ListEventsAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabHookEvent",
+      "purpose": "List a project webhook's delivery log, newest first, for debugging failed deliveries (7-day retention, bounded)."
+    },
+    {
+      "name": "gitlab_list_group_hook_deliveries",
+      "client": "IGroupHooksClient",
+      "method": "ListEventsAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabHookEvent",
+      "purpose": "List a group webhook's delivery log, newest first (7-day retention, bounded)."
+    },
+    {
+      "name": "gitlab_create_feature_flag",
+      "client": "IFeatureFlagsClient",
+      "method": "CreateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps"
+      ],
+      "returns": "GitLabFeatureFlag",
+      "purpose": "Create a project feature flag, optionally with strategies already attached."
+    },
+    {
+      "name": "gitlab_set_license_policy",
+      "client": "ILicensesClient",
+      "method": "CreateManagedAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabManagedLicense",
+      "purpose": "Create or update the allow/deny verdict for a software license on a project (upserts by license name; calls UpdateManagedAsync instead of CreateManagedAsync when the named policy already exists)."
+    },
+    {
+      "name": "gitlab_create_project_hook",
+      "client": "IProjectHooksClient",
+      "method": "AddAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabProjectHook",
+      "purpose": "Add a webhook to a project, selecting which event types it fires on."
+    },
+    {
+      "name": "gitlab_create_group_hook",
+      "client": "IGroupHooksClient",
+      "method": "CreateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabGroupHook",
+      "purpose": "Add a webhook to a group, selecting which event types it fires on."
+    },
+    {
+      "name": "gitlab_create_system_hook",
+      "client": "ISystemHooksClient",
+      "method": "CreateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "AdminOnly"
+      ],
+      "returns": "GitLabSystemHook",
+      "purpose": "Register an instance-wide system hook that fires on events across every project and group."
+    },
+    {
+      "name": "gitlab_set_group_integration",
+      "client": "IIntegrationsClient",
+      "method": "SetForGroupAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabIntegration",
+      "purpose": "Create or fully replace a group integration's settings by slug (same full-replace semantics as the project form)."
+    }
+  ],
+  "lifecycle": [
+    {
+      "name": "gitlab_duo_chat",
+      "client": "IDuoClient",
+      "method": "ChatAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "Developer",
+        "Maintainer",
+        "DevOps"
+      ],
+      "returns": "JsonElement (untyped)",
+      "purpose": "Ask GitLab Duo Chat a question, optionally scoped to an issue/MR/commit, without leaving the MCP session."
+    },
+    {
+      "name": "gitlab_list_project_templates",
+      "client": "IProjectImportClient",
+      "method": "ListTemplatesAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "Developer",
+        "Maintainer"
+      ],
+      "returns": "IAsyncEnumerable<GitLabProjectTemplate>",
+      "purpose": "List the Dockerfile/.gitignore/CI/licence/issue/MR templates available to a project, bounded by limit."
+    },
+    {
+      "name": "gitlab_list_bulk_import_entities",
+      "client": "IBulkImportsClient",
+      "method": "ListEntitiesAsync, ListEntitiesForImportAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "IAsyncEnumerable<GitLabBulkImportEntity>",
+      "purpose": "List the per-group/per-project entities of one migration, or of every migration when no import id is given, bounded by limit."
+    },
+    {
+      "name": "gitlab_list_ml_experiments",
+      "client": "IMlExperimentsClient",
+      "method": "SearchExperimentsAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabMlflowExperimentList",
+      "purpose": "List a project's MLflow-tracked experiments, paged/ordered, bounded by limit."
+    },
+    {
+      "name": "gitlab_get_group_export_download_info",
+      "client": "IGroupImportClient",
+      "method": "DownloadExportAsync",
+      "readOnly": true,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabFileResponse (headers only: FileName/ContentType/ContentLength)",
+      "purpose": "Confirm a scheduled group export archive is ready and report its size/name without transferring the archive bytes."
+    },
+    {
+      "name": "gitlab_create_ml_experiment",
+      "client": "IMlExperimentsClient",
+      "method": "CreateExperimentAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps"
+      ],
+      "returns": "GitLabMlflowNewExperiment",
+      "purpose": "Create a new MLflow-compatible experiment in a project."
+    },
+    {
+      "name": "gitlab_export_project",
+      "client": "IProjectImportClient",
+      "method": "ExportAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "void (202 Accepted)",
+      "purpose": "Schedule an async export of a project so its archive can later be downloaded or used to seed a migration."
+    },
+    {
+      "name": "gitlab_create_bulk_import",
+      "client": "IBulkImportsClient",
+      "method": "CreateAsync",
+      "readOnly": false,
+      "destructive": false,
+      "profiles": [
+        "DevOps",
+        "AdminOnly"
+      ],
+      "returns": "GitLabBulkImport",
+      "purpose": "Start a direct-transfer migration of groups/projects from another GitLab instance -- GitLab's recommended migration path over file export/import."
+    }
+  ]
+}

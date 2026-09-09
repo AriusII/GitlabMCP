@@ -1,0 +1,14 @@
+<Solution>
+    <Folder Name="/src/">
+        <Project Path="src/GitlabMCP.Abstractions/GitlabMCP.Abstractions.csproj"/>
+        <Project Path="src/GitlabMCP.Contracts/GitlabMCP.Contracts.csproj"/>
+        <Project Path="src/GitlabMCP.GraphQL/GitlabMCP.GraphQL.csproj"/>
+        <Project Path="src/GitlabMCP.Mapping/GitlabMCP.Mapping.csproj"/>
+        <Project Path="src/GitlabMCP.Profiles/GitlabMCP.Profiles.csproj"/>
+        <Project Path="src/GitlabMCP.Tools/GitlabMCP.Tools.csproj"/>
+        <Project Path="src/GitlabMCP/GitlabMCP.csproj"/>
+    </Folder>
+    <Folder Name="/tests/">
+        <Project Path="tests/GitlabMCP.Tests/GitlabMCP.Tests.csproj"/>
+    </Folder>
+</Solution>

@@ -1,0 +1,83 @@
+name: CI
+
+# Every push/PR gets both gates that actually matter for this repo: the managed .NET build+test, and
+# a full Docker build (which is the Native AOT publish gate for linux-musl-x64 — CLAUDE.md's "the real
+# gate" — since the Dockerfile's build stage runs that exact `dotnet publish` inside the container).
+# Neither job needs a secret, so this also runs cleanly on a fork's pull request.
+#
+# Action pins below are the majors verified (2026-09-09) to ship `runs: using: 'node24'` — GitHub retires
+# Node 20 runner support on 2026-09-23, and every one major below that (checkout@v4-6, setup-dotnet@v4-5,
+# cache@v4-5, upload-artifact@v4-6, setup-buildx-action@v1-3, build-push-action@v1-6) is still on node20.
+# Do not downgrade any of these without re-checking that date.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    name: Build & test (Release)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        # dotnet-version is intentionally omitted: global.json pins the exact SDK (10.0.401) this repo
+        # builds with everywhere else, and setup-dotnet honours it automatically when present.
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore GitlabMCP.slnx
+
+      - name: Build (Release)
+        run: dotnet build GitlabMCP.slnx --configuration Release --no-restore
+
+      - name: Test
+        run: >
+          dotnet test GitlabMCP.slnx --configuration Release --no-build
+          --logger "trx;LogFileName=test-results.trx" --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results
+          path: TestResults/*.trx
+          retention-days: 14
+
+  docker-build-check:
+    name: Docker image builds (validation only, no push)
+    needs: build-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Build linux/amd64 image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64
+          push: false
+          build-args: |
+            RID=linux-musl-x64
+            BUILD_CONFIGURATION=Release
+            APP_VERSION=0.0.0-ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

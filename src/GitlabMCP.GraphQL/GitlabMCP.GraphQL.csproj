@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <ProjectReference Include="..\GitlabMCP.Contracts\GitlabMCP.Contracts.csproj"/>
+        <ProjectReference Include="..\GitlabMCP.Abstractions\GitlabMCP.Abstractions.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- GitLabClientOptions / GitLabAuthenticationMode — reads the SAME options the REST client
+             (AddGitLabClient) was configured with (DEC-020/021), never a second credential. -->
+        <PackageReference Include="GitLab.Client"/>
+    </ItemGroup>
+
+</Project>

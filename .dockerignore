@@ -1,0 +1,17 @@
+# Build outputs
+**/bin/
+**/obj/
+# Tooling / VCS
+.git/
+.gitignore
+.idea/
+.vs/
+.vscode/
+.claude/
+**/*.user
+**/*.log
+# Docs & docker
+Dockerfile*
+.dockerignore
+**/*.md
+LICENSE

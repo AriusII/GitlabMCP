@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <ProjectReference Include="..\GitlabMCP.Contracts\GitlabMCP.Contracts.csproj"/>
+        <ProjectReference Include="..\GitlabMCP.GraphQL\GitlabMCP.GraphQL.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- Projects GitLab.Client DTOs into the owned records Contracts declares. -->
+        <PackageReference Include="GitLab.Client"/>
+    </ItemGroup>
+
+</Project>

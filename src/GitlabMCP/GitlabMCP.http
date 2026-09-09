@@ -1,0 +1,76 @@
+@HostAddress = http://localhost:9080
+
+### ping - liveness (the canary tool, granted in every profile)
+POST {{HostAddress}}/
+Accept: application/json, text/event-stream
+Content-Type: application/json
+MCP-Protocol-Version: 2025-11-25
+
+{ "jsonrpc": "2.0", "id": 1, "method": "ping" }
+
+### initialize - not required under Stateless mode, but the first real client call
+POST {{HostAddress}}/
+Accept: application/json, text/event-stream
+Content-Type: application/json
+MCP-Protocol-Version: 2025-11-25
+
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "initialize",
+  "params": {
+    "protocolVersion": "2025-11-25",
+    "capabilities": {},
+    "clientInfo": { "name": "GitlabMCP.http", "version": "1.0" }
+  }
+}
+
+### tools/list - the active profile's advertised surface (compare against tests/snapshots/<profile>.tools.txt)
+POST {{HostAddress}}/
+Accept: application/json, text/event-stream
+Content-Type: application/json
+MCP-Protocol-Version: 2025-11-25
+
+{ "jsonrpc": "2.0", "id": 3, "method": "tools/list" }
+
+### prompts/list
+POST {{HostAddress}}/
+Accept: application/json, text/event-stream
+Content-Type: application/json
+MCP-Protocol-Version: 2025-11-25
+
+{ "jsonrpc": "2.0", "id": 4, "method": "prompts/list" }
+
+### resources/list - the two direct, server-authored resources (never GitLab content)
+POST {{HostAddress}}/
+Accept: application/json, text/event-stream
+Content-Type: application/json
+MCP-Protocol-Version: 2025-11-25
+
+{ "jsonrpc": "2.0", "id": 5, "method": "resources/list" }
+
+### resources/read - server_info: confirms the active profile, version and GitLab target without calling GitLab
+POST {{HostAddress}}/
+Accept: application/json, text/event-stream
+Content-Type: application/json
+MCP-Protocol-Version: 2025-11-25
+
+{
+  "jsonrpc": "2.0",
+  "id": 6,
+  "method": "resources/read",
+  "params": { "uri": "gitlab-mcp://server/info" }
+}
+
+### tools/call - gitlab_ping: the one tool that proves the configured GitLab token actually works
+POST {{HostAddress}}/
+Accept: application/json, text/event-stream
+Content-Type: application/json
+MCP-Protocol-Version: 2025-11-25
+
+{
+  "jsonrpc": "2.0",
+  "id": 7,
+  "method": "tools/call",
+  "params": { "name": "gitlab_ping", "arguments": {} }
+}

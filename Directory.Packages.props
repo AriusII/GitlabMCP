@@ -1,0 +1,32 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <!-- This repo currently has one package source (nuget.org, no NuGet.config committed). CPM
+         only warns (NU1507) once a SECOND source is added without package-source mapping — nothing
+         to do here yet, but if a private feed is ever introduced for GitLab.Client or an internal
+         package, add source mapping in NuGet.config at that point, not before. -->
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- MCP SDK. ModelContextProtocol.AspNetCore 2.2.0's own nuspec bracket-pins
+         ModelContextProtocol [2.2.0], which bracket-pins ModelContextProtocol.Core [2.2.0] in turn.
+         Since GitlabMCP.Contracts/GitlabMCP.Profiles/GitlabMCP.GraphQL take a *direct*
+         PackageReference on ModelContextProtocol.Core, this pin MUST match the host's transitive
+         closure exactly or restore conflicts (NU1608-shaped) the moment the reference graph is
+         walked — this is the exact shape of the 2.1.0/2.2.0 drift DECISIONS.md DEC-002 records.
+         When bumping one, bump both in the same commit. -->
+    <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="2.2.0" />
+    <PackageVersion Include="ModelContextProtocol.Core" Version="2.2.0" />
+    <!-- GitLab REST client (AriusII). Only 1.0.0 exists / is cached. -->
+    <PackageVersion Include="GitLab.Client" Version="1.0.0" />
+    <!-- No Microsoft.Extensions.Http.Resilience: its AOT-cleanliness is unverified upstream (no
+         dated IsAotCompatible statement, per docs/architecture.md's GraphQL research) and this
+         build has no guaranteed network access to even try it. GitlabMCP.GraphQL and the REST
+         client share a hand-rolled DelegatingHandler instead (DEC-021) — same retry/backoff shape,
+         zero extra dependency, zero AOT risk. -->
+    <!-- Test project. Versions match what `dotnet new xunit` wired up under SDK 10.0.401. -->
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.0" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.0" />
+    <PackageVersion Include="coverlet.collector" Version="10.0.1" />
+  </ItemGroup>
+</Project>

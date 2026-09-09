@@ -427,3 +427,6 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# GitlabMCP: the compose.yaml Docker secret (a real PAT) — never committed. See compose.yaml's own comment.
+gitlab_token.txt

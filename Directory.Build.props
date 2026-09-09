@@ -1,0 +1,85 @@
+<Project>
+
+    <!--
+      Shared defaults for every project in the repo (src/*, tests/*). This file is imported BEFORE
+      each project body is evaluated, so anything here is a project-overridable *default*, not a
+      final answer — a project can still redefine any of these properties in its own .csproj and win,
+      because .csproj is evaluated after Directory.Build.props.
+  
+      TRAP — read before adding anything conditioned on $(TargetFramework):
+      $(TargetFramework) is set INSIDE the project body (by the project's own <TargetFramework>
+      element, itself only evaluated after this file is imported). For a project that single-targets
+      (every project in this repo does — no <TargetFrameworks> plural anywhere), $(TargetFramework)
+      is still EMPTY at the point this file is evaluated. A condition like
+      Condition="'$(TargetFramework)'=='net10.0'" written in THIS file will silently never match and
+      the PropertyGroup underneath it will silently never apply — no error, no warning, just a
+      property that quietly isn't set. That class of condition belongs in Directory.Build.targets
+      (imported AFTER the project body, where $(TargetFramework) is finally populated) — see that
+      file's own comment. $(MSBuildProjectName), by contrast, IS safe to condition on here: it's a
+      reserved MSBuild property set by the engine from the project's file name before any .props file
+      is read at all.
+    -->
+
+    <PropertyGroup>
+        <!-- Single shared TFM. Bump this in exactly one place when the repo moves to net11.0. -->
+        <TargetFramework>net10.0</TargetFramework>
+
+        <!-- C# 14 ships as the implicit default for a net10.0 TFM anyway, but pin it explicitly:
+             CLAUDE.md states "C# 14 / .NET 10" as a project fact, and an explicit LangVersion means a
+             future SDK bump (e.g. installing a preview SDK) can't silently move every project onto a
+             newer C# version mid-stream without that being a visible, deliberate diff here. -->
+        <LangVersion>14.0</LangVersion>
+
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+
+        <!-- Zero-warning policy (CLAUDE.md: "the current tree publishes clean with zero warnings, keep
+             it that way"). This governs ordinary C# compiler warnings (CSxxxx) AND the AOT/trim
+             analyzer warnings below, since those are emitted through the same Roslyn analyzer/warning
+             pipeline during `dotnet build` — NOT the full-closure ILLink trimmer warnings, which only
+             exist during `dotnet publish` and are a separate, later gate (see aot-publish-gate skill;
+             CLAUDE.md's own "the debug build does *not* exercise it"). A project with a genuine,
+             reviewed reason to relax this sets <TreatWarningsAsErrors>false</TreatWarningsAsErrors> in
+             its own .csproj — that assignment is evaluated after this file and wins without needing a
+             Condition guard here, because project-file assignments always come after Directory.Build.props
+             in the evaluation order regardless of how the earlier value was set. -->
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+        <!-- Deterministic builds. `Deterministic` is already `true` by default for every SDK-style
+             project — the only thing actually worth setting here is ContinuousIntegrationBuild, which
+             is NOT on by default and strips machine-local source paths from PDBs/assemblies for
+             official builds. It stays off for local `dotnet build` / `dotnet run` on a dev box on
+             purpose: with it on, the debugger can't map back to local source files. Wire your CI's own
+             "am I in CI" variable in below; TF_BUILD is Azure Pipelines, GITHUB_ACTIONS is GitHub
+             Actions — add others as this repo picks up more CI. -->
+        <ContinuousIntegrationBuild Condition="'$(TF_BUILD)' == 'true' OR '$(GITHUB_ACTIONS)' == 'true' OR '$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+    </PropertyGroup>
+
+    <!--
+      AOT/trim analyzers — LIBRARIES only, not the host, not the test project.
+  
+      Why libraries: setting IsAotCompatible=true turns on IsTrimmable + EnableTrimAnalyzer +
+      EnableSingleFileAnalyzer + EnableAotAnalyzer for that assembly. That means an accidental
+      reflection-y / non-source-generated-JSON / non-trim-safe API creeping into GitlabMCP.Mapping or
+      GitlabMCP.Tools is caught as an IL2xxx/IL3xxx warning (promoted to an error by
+      TreatWarningsAsErrors above) the moment THAT library builds — not later when someone finally
+      runs the full `dotnet publish -r linux-musl-x64` gate. Cheapest possible feedback loop for the
+      thing CLAUDE.md calls "the real gate."
+  
+      Why NOT the host (GitlabMCP itself): PublishAot=true (set in the host's own .csproj) already
+      turns on the equivalent dynamic-code-usage analysis for the host during build/publish on its
+      own. Also setting IsAotCompatible there is redundant, not wrong — but this repo's zero-noise
+      philosophy says don't restate what's already implied.
+  
+      Why NOT the test project: Microsoft.NET.Test.Sdk / xunit.runner.visualstudio pull in test-host
+      infrastructure that is not trim-safe and never ships as a published artifact — turning the
+      analyzer on there manufactures warnings about code that will never be AOT-published, for zero
+      benefit, and TreatWarningsAsErrors above would then make an unrelated test-infra change break
+      the build.
+    -->
+    <PropertyGroup Condition="'$(MSBuildProjectName)' != 'GitlabMCP' AND !$(MSBuildProjectName.EndsWith('.Tests'))">
+        <IsAotCompatible>true</IsAotCompatible>
+    </PropertyGroup>
+
+</Project>

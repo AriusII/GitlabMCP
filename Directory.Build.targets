@@ -1,0 +1,28 @@
+<Project>
+
+    <!--
+      This file is imported AFTER every project's own body (evaluation order:
+      Directory.Build.props -> SDK .props -> the .csproj itself -> SDK .targets ->
+      Directory.Build.targets), so unlike Directory.Build.props, $(TargetFramework) and
+      $(RuntimeIdentifier)/$(RuntimeIdentifiers) are fully populated by the time anything here runs —
+      this is the ONLY place in this repo's shared build files where it is safe to branch on them.
+      Nothing in this repo currently needs a TargetFramework-conditioned property (every project
+      single-targets net10.0), so there is no such block below today — if one is ever needed
+      (e.g. a future net11.0 migration that multi-targets one library during the transition), it goes
+      here, never in Directory.Build.props.
+    -->
+
+    <!--
+      Guard rail: RIDs are host-only (CLAUDE.md's Native AOT rules; DEC-018's project split).
+      RuntimeIdentifier/RuntimeIdentifiers CAN be set from inside a project's own <PropertyGroup>, so
+      — same reasoning as $(TargetFramework) above — their final value also isn't trustworthy until
+      after the project body has been evaluated, which is why this check lives in .targets rather
+      than .props. Runs before Build/Restore/Publish so it fails fast instead of after a slow restore.
+    -->
+    <Target Name="GitlabMCP_ForbidRidOnLibraries" BeforeTargets="Build;Restore;Publish">
+        <Error
+                Condition="'$(MSBuildProjectName)' != 'GitlabMCP' AND ('$(RuntimeIdentifier)' != '' OR '$(RuntimeIdentifiers)' != '')"
+                Text="RuntimeIdentifier(s) must only be set on the GitlabMCP host project ($(MSBuildProjectName) declares RID='$(RuntimeIdentifier)' RIDs='$(RuntimeIdentifiers)')."/>
+    </Target>
+
+</Project>

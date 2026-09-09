@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <RuntimeIdentifiers>win-x64;linux-x64;linux-musl-x64</RuntimeIdentifiers>
+        <UserSecretsId>49084b7c-a0aa-4904-ab77-c4b617082b5b</UserSecretsId>
+
+        <!-- Set up the MCP server to be a self-contained application that does not rely on a shared framework -->
+        <SelfContained>true</SelfContained>
+        <PublishSelfContained>true</PublishSelfContained>
+
+        <!-- Set up the MCP server to be a single file executable -->
+        <PublishSingleFile>true</PublishSingleFile>
+
+        <!-- Configure the MCP server to be a native AOT application with invariant globalization -->
+        <PublishAot>true</PublishAot>
+        <InvariantGlobalization>true</InvariantGlobalization>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="ModelContextProtocol.AspNetCore"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\GitlabMCP.Abstractions\GitlabMCP.Abstractions.csproj"/>
+        <ProjectReference Include="..\GitlabMCP.Contracts\GitlabMCP.Contracts.csproj"/>
+        <ProjectReference Include="..\GitlabMCP.Mapping\GitlabMCP.Mapping.csproj"/>
+        <ProjectReference Include="..\GitlabMCP.GraphQL\GitlabMCP.GraphQL.csproj"/>
+        <ProjectReference Include="..\GitlabMCP.Profiles\GitlabMCP.Profiles.csproj"/>
+        <ProjectReference Include="..\GitlabMCP.Tools\GitlabMCP.Tools.csproj"/>
+    </ItemGroup>
+
+</Project>
