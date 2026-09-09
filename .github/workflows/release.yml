@@ -88,6 +88,11 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # No cache-from/cache-to (DEC-035): the Dockerfile's restore and publish steps share a NuGet
+      # RUN --mount=type=cache, which is not part of either layer's exported diff. On GitHub's ephemeral
+      # runners, a gha-cache-hit on the restore layer (execution skipped) followed by a live publish run
+      # leaves the publish step's mount empty -> NETSDK1064. Do not reintroduce this without re-reading
+      # docker-aot-image's "Common Pitfalls" table — reproduced on this exact repo 2026-09-09.
       - name: Build and push linux/amd64 image
         uses: docker/build-push-action@v7
         with:
@@ -106,8 +111,6 @@ jobs:
             ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.version }}
             ${{ steps.meta.outputs.image }}:latest-amd64
             ${{ steps.meta.outputs.image }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
   github-release:
     name: Publish GitHub Release

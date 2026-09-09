@@ -1076,6 +1076,33 @@ deliberate: an agent mid-task should not have to fill seven fields to record tha
   37→52. README.md, `compose.yaml` and the `docker-aot-image` skill's config-key index were updated to
   describe "just set your instance's URL" rather than "must end in `api/v4/`".
 
+### DEC-035 · GitHub Actions Docker build: no `cache-from`/`cache-to: type=gha`
+
+- **Status** DECIDED · **Date** 2026-09-10 · **Owner files** `.github/workflows/ci.yml`, `.github/workflows/release.yml`
+- **Decision.** Neither workflow's `docker/build-push-action` step sets `cache-from`/`cache-to`. Restore
+  and publish always run together, live, in one uninterrupted BuildKit session per CI run — never one
+  imported from cache and the other executed fresh.
+- **Context.** The commit that landed DEC-034 triggered CI's Docker job to fail with the exact
+  `NETSDK1064` ("Package Microsoft.NET.ILLink.Tasks ... was not found") the `docker-aot-image` skill's own
+  pitfall table already named — one layer up from where that table described it. `type=gha` caches
+  *layers*; the Dockerfile's restore and publish steps share a `RUN --mount=type=cache` NuGet mount, which
+  is explicitly excluded from a layer's exported filesystem diff. GitHub's runners are ephemeral — a fresh
+  BuildKit builder every job — so when buildx cache-hit the restore layer (skipping its execution, and
+  with it the mount-fill restore would have done) while a later `COPY src/` change forced publish to run
+  live, publish's mount was empty and `--no-restore` had nothing to work with. This never reproduced
+  locally: a persistent local Docker daemon keeps the same cache-mount store across every build, so restore
+  populating it once was enough for the whole session, masking the bug completely until the very first CI
+  run to hit a partial cache (the second CI run overall — the first had no prior gha cache to import from
+  at all, so it ran everything live and happened to pass).
+- **Consequences.** Confirmed fixed: re-pushing without `cache-from`/`cache-to` produced a fully green CI
+  run. Slower Docker builds on every CI run (no restore-layer reuse across runs) in exchange for
+  correctness — the AOT `Generating native code` step dominates wall-clock time either way (~200s of
+  ~230s total, measured), so the caching this removes was buying comparatively little. Do not reintroduce
+  `type=gha` (or any other cache backend) for this build step without first either (a) fusing restore and
+  publish into one `RUN` so they can never be cache-split, or (b) verifying the chosen cache backend
+  actually persists BuildKit mount contents across ephemeral runners, not just layers — re-read
+  `docker-aot-image`'s "Common Pitfalls" table first either way.
+
 ## Re-verify the stamped facts
 
 Run from the repo root in Git Bash. Each was run on 2026-09-09 and the expected output is beside it.
