@@ -226,12 +226,16 @@ PublishScripts/
 *.nupkg
 # NuGet Symbol Packages
 *.snupkg
-# The packages folder can be ignored because of Package Restore
-**/[Pp]ackages/*
-# except build/, which is used as an MSBuild target.
-!**/[Pp]ackages/build/
-# Uncomment if necessary however generally it will be regenerated when needed
-#!**/[Pp]ackages/repositories.config
+# GitlabMCP: this repo uses Central Package Management (Directory.Packages.props) + PackageReference
+# exclusively — there is no packages.config-era `packages/` restore folder to ignore, ever. The
+# standard VisualStudio.gitignore boilerplate rule that used to sit here, `**/[Pp]ackages/*` (plus its
+# `!**/[Pp]ackages/build/` exception), case-insensitively swallowed this project's OWN
+# `src/GitlabMCP.Contracts/Packages/` and `src/GitlabMCP.Mapping/Packages/` source directories instead —
+# 15 files, the entire GitLab Packages/Container Registry/Debian/Terraform-module domain, were silently
+# never tracked by git from the moment those directories were created. It went unnoticed all session
+# because every local `dotnet build`/`docker build` reads the real filesystem directly, not through git;
+# only a fresh clone (exactly what GitHub Actions does) exposed it — see DEC-033. Deleted, not narrowed:
+# do not reintroduce any `[Pp]ackages` pattern here.
 # NuGet v3's project.json files produces more ignorable files
 *.nuget.props
 *.nuget.targets
